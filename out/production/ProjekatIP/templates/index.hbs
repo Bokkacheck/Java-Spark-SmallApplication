@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+</head>
+<body style="background-color: beige;">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto d-flex justify-content-center w-100 font-weight-bold">
+            <li class="nav-item active m-auto">
+                <a class="nav-link" href="/">Pocetna</a>
+            </li>
+            <li class="nav-item d-flex m-auto">
+                <input id="pretragaTekst" class="form-control" type="search" placeholder="Search" aria-label="Pretrazi">
+                <button class="btn btn-outline-success ml-2" onclick="Pretrazi()">Pretrazi</button>
+            </li>
+            <li class="nav-item m-auto">
+                {{#if admin}}
+                    <span class="btn btn-outline-light " onclick="Odjava()">Odjava</span>
+                {{else}}
+                    <span class="btn btn-outline-light " onclick="$('#prijavaModal').modal('show')">Prijava</span>
+                {{/if}}
+            </li>
+        </ul>
+    </div>
+</nav>
+<br>
+<div class="container">
+    <div class="row">
+        {{#if admin}}
+            <h2 class="text-center text-italic col-md-8">OPREMA ZA RIBOLOV</h2>
+            <p class="btn btn-outline-dark col-md-2 m-auto" onclick="DodajPrikaz()">DODAJ NOVI</p>
+            <a class="btn btn-outline-dark col-md-2 m-auto" href="/izmenaSelect">Izmena proizvoda</a>
+        {{else}}
+            <h2 class="text-center text-italic w-100">OPREMA ZA RIBOLOV</h2>
+        {{/if}}
+    </div>
+    <!--    Pretraga-->
+    <section id="pretraga">
+        <div class="row mt-4 pb-2" style="border: 1px solid black">
+            <div class="col-md-2">
+                <label for="kategorija">Kategorija</label><br>
+                <select name="kategorija" id="kategorija" class="form-control" onchange="PopuniSelect2(this)"></select>
+            </div>
+            <div class="col-md-2">
+                <label for="tip">Tip</label><br>
+                <select name="tip" id="tip" class="form-control">
+                    <option value="null">Odaberi</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="marka">Marka</label><br>
+                <select name="marka" id="marka" class="form-control" onchange="PopuniSelect2(this)"></select>
+            </div>
+            <div class="col-md-2">
+                <label for="model">Model</label><br>
+                <select name="model" id="model" class="form-control">
+                    <option value="null">Odaberi</option>
+                </select>
+            </div>
+            <div class="col-md-4 p-0 m-0">
+                <div class="row p-0 m-0">
+                    <div class="col-md-5">
+                        <label for="min">Min</label><br>
+                        <input type="number" min="1" max="999999" id="cenaMin" class="form-control">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="max">Max</label><br>
+                        <input type="number" min="1" max="999999" id="cenaMax" class="form-control">
+                    </div>
+                    <div class="col-md-3">
+                        <br>
+                        <span class="btn btn-lg btn-outline-dark" onclick="Pretraga()"><i class="fas fa-search"></i></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="row mt-4 font-weight-bold">
+        <div class="col-md-2 ml-auto">Grupa</div>
+        <div class="col-md-2">Tip</div>
+        <div class="col-md-2">Marka</div>
+        <div class="col-md-2">Model</div>
+        <div class="col-md-1">Cena</div>
+        <div class="col-md-1 mr-auto">Pregled</div>
+        {{#if admin}}
+            <div class="col-md-1">Izmena</div>
+            <div class="col-md-1">Brisanje</div>
+        {{/if}}
+    </div>
+    <section id="prikaz"></section>
+
+    <!--    Modal-->
+    <div class="modal fade" id="modalPrikaz" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content text-center">
+                <div class="modal-header">
+                    <h5 class="modal-title ml-auto" id="modalNaslov" >Prikaz proizvoda</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <section id="prikazModal">
+                        <p class="border">Grupa: <span id="prikazGrupa"></span></p>
+                        <p class="border">Tip: <span id="prikazTip"></span></p>
+                        <p class="border">Model: <span id="prikazModel"></span></p>
+                        <p class="border">Marka: <span id="prikazMarka"></span></p>
+                        <p class="border">Opis: <br> <span id="prikazOpis"></span></p>
+                        <p class="border">Cena: <span id="prikazCena"></span></p>
+                    </section>
+                    {{#if admin}}
+                        <section id="izmenaDodavanjeModal">
+                            <p>Grupa: <input type="text" id="izmenaDodavanjeGrupa" class="form-control"></p>
+                            <p>Tip: <input type="text" id="izmenaDodavanjeTip"class="form-control"></p>
+                            <p>Marka: <input type="text" id="izmenaDodavanjeMarka" class="form-control"></p>
+                            <p>Model: <input type="text" id="izmenaDodavanjeModel" class="form-control"></p>
+                            <p>Opis: <textarea id="izmenaDodavanjeOpis" class="form-control"></textarea></p>
+                            <p>Cena: <input type="number" id="izmenaDodavanjeCena"class="form-control"></p>
+
+                            <p><button id="btnIzmeni" class="btn btn-lg btn-outline-dark" data-id = "0" onclick="Izmena(this)">IZMENI</button></p>
+                            <p><button id="btnDodaj" class="btn btn-lg btn-outline-dark" data-id = "0" onclick="Dodaj(this)">DODAJ</button></p>
+                        </section>
+                    {{/if}}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Zatvori</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="prijavaModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content text-center">
+                <div class="modal-header">
+                    <h5 class="modal-title ml-auto" id="modalNaslov" >Prijava</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <label for="userName">Unesite korisnicko ime: (admin)</label><br>
+                    <input type="text" id="userName" class="form-control">
+                    <label for="userName">Unesite lozinku: (admin)</label><br>
+                    <input type="password" id="password" class="form-control"><br>
+                    <button class="btn btn-outline-dark" onclick="Prijava()">Prijavi se</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<script>
+    {{#if admin}}
+        function Brisanje(id) {
+        if(confirm("Da li ste sigurni da zelite da obrisete ovaj proizvod ?")){
+            $.ajax({
+                url:"/brisanje",
+                method:"POST",
+                dataType:"json",
+                data:{"id":id},
+                success: function (response) {
+                    alert(response);
+                    OsveziSve();
+                }
+            });
+        }
+    }
+        function Odjava() {
+        $.ajax({
+            url:"/odjava",
+            method:"POST",
+            dataType:"json",
+            success:function (response) {
+                window.location.href = "/";
+            }
+        });
+    }
+        function DodajPrikaz() {
+            $('#modalNaslov').html("Dodaj proizvod");
+            $('#prikazModal').css({"display":"none"});
+            $('#izmenaDodavanjeModal').css({"display":"block"});
+            let response = {"id":0,"grupa":"","tip":"","marka":"","model":"","opis":"","cena":""};
+            PopuniModal(response);
+            $('#btnIzmeni').css({"display":"none"});
+            $('#btnDodaj').css({"display":"block"});
+            $('#modalPrikaz').modal('show');
+        }
+        function IzmenaPrikaz(id) {
+            $.ajax({
+                url:"/proizvod",
+                method:"post",
+                dataType:"json",
+                data:{"id":id},
+                success:function (response) {
+                    $('#modalNaslov').html("Izmeni proizvod");
+                    $('#prikazModal').css({"display":"none"});
+                    $('#izmenaDodavanjeModal').css({"display":"block"});
+                    $('#btnIzmeni').css({"display":"block"});
+                    $('#btnDodaj').css({"display":"none"});
+                    PopuniModal(response)
+                    document.querySelector("#btnIzmeni").setAttribute("data-id",response.id);
+                    $('#modalPrikaz').modal('show');
+                }
+        })}
+        function PopuniModal(response) {
+            document.querySelector("#izmenaDodavanjeGrupa").value = response.grupa;
+            document.querySelector("#izmenaDodavanjeTip").value = response.tip;
+            document.querySelector("#izmenaDodavanjeMarka").value = response.marka;
+            document.querySelector("#izmenaDodavanjeModel").value = response.model;
+            document.querySelector("#izmenaDodavanjeOpis").value = response.opis;
+            document.querySelector("#izmenaDodavanjeCena").value = response.cena;
+        }
+        function Izmena(el) {
+            let data = FormirajPodatke(el.getAttribute("data-id"));
+            if(data==null){
+                alert("Neispravan unos podataka");
+                return;
+            }
+            $.ajax({
+                url:"/izmena",
+                method:"POST",
+                dataType:"json",
+                data:data,
+                success:function (response) {
+                    alert(response);
+                    OsveziSve();
+                }
+            })
+        }
+        function Dodaj() {
+            let data = FormirajPodatke(0);
+            if(data==null){
+                alert("Neispravan unos podataka");
+                return;
+            }
+            $.ajax({
+                url:"/dodaj",
+                method:"POST",
+                dataType:"json",
+                data:data,
+                success:function (response) {
+                    alert(response);
+                    OsveziSve();
+                }
+            })
+        }
+        function FormirajPodatke(id) {
+            let data = {"id":id,"grupa":document.querySelector("#izmenaDodavanjeGrupa").value,"tip":document.querySelector("#izmenaDodavanjeTip").value,
+                        "marka":document.querySelector("#izmenaDodavanjeMarka").value,"model":document.querySelector("#izmenaDodavanjeModel").value,
+                        "opis":document.querySelector("#izmenaDodavanjeOpis").value,"cena":document.querySelector("#izmenaDodavanjeCena").value};
+            if(data.cena==0 || data.cena == "" || data.cena > 999999 || data.grupa==""||data.tip ==""|| data.marka=="" || data.model==""){
+                data = null;
+                return data;
+            }
+            data.cena = Math.abs(Number.parseFloat(data.cena));
+            return data;
+        }
+    {{/if}}
+    function Pretrazi() {
+        let tekst = document.querySelector("#pretragaTekst").value;
+        if(tekst==""){
+            return;
+        }
+        $.ajax({
+            url:"/pretraziSve",
+            method:"POST",
+            dataType:"json",
+            data:{"tekst":tekst},
+            success:function (response) {
+                Prikaz(response);
+            }
+        })
+    }
+    function Pretraga() {
+        let grupa = document.querySelector("#kategorija").value;
+        let tip = document.querySelector("#tip").value;
+        let marka = document.querySelector("#marka").value;
+        let model = document.querySelector("#model").value;
+        let min = Math.abs(Number.parseFloat(document.querySelector("#cenaMin").value));
+        let max = Math.abs(Number.parseFloat(document.querySelector("#cenaMax").value));
+        if(min>max){
+            let tmp = min;
+            min = max;
+            max = tmp;
+        }
+        document.querySelector("#cenaMin").value = min;
+        document.querySelector("#cenaMax").value = max;
+        if(min == "") min = 0;
+        if(max == "") max = 999999;
+        console.log(grupa);
+        console.log(tip);
+        console.log(marka);
+        console.log(model);
+        console.log(min);
+        console.log(max);
+        $.ajax({
+           url:"/pretraga",
+            method:"POST",
+            dataType:"json",
+            data:{"grupa":grupa,"tip":tip,"marka":marka,"model":model,"min":min,"max":max},
+            success:function (response) {
+                Prikaz(response);
+            }
+        });
+    }
+    function Pregled(id) {
+        $.ajax({
+            url:"/proizvod",
+            method:"post",
+            dataType:"json",
+            data:{"id":id},
+            success:function (response) {
+                $('#modalNaslov').html("Pregledaj proizvod");
+                $('#prikazModal').css({"display":"block"});
+                {{#if admin}}
+                    $('#izmenaDodavanjeModal').css({"display":"none"});
+                {{/if}}
+                console.log(response);
+                document.querySelector("#prikazGrupa").innerHTML = response.grupa;
+                document.querySelector("#prikazTip").innerHTML = response.tip;
+                document.querySelector("#prikazMarka").innerHTML = response.marka;
+                document.querySelector("#prikazModel").innerHTML = response.model;
+                document.querySelector("#prikazOpis").innerHTML = response.opis;
+                document.querySelector("#prikazCena").innerHTML = response.cena;
+                $('#modalPrikaz').modal('show');
+            }
+        });
+    }
+    function Prikaz(response) {
+        let prikaz = document.querySelector("#prikaz");
+        let txt = "";
+        for(let i = 0;i<response.length;i++){
+            txt+=`<div class="row border p-2">`;
+            txt+=`<div class="col-md-2 ml-auto">${response[i].grupa}</div>`
+            txt+=`<div class="col-md-2">${response[i].tip}</div>`
+            txt+=`<div class="col-md-2">${response[i].marka}</div>`
+            txt+=`<div class="col-md-2">${response[i].model}</div>`
+            txt+=`<div class="col-md-1">${response[i].cena}</div>`
+            txt+=`<div class="col-md-1 text-center mr-auto"><button class="btn btn-outline-dark" onclick="Pregled(${response[i].id})"><i class="fas fa-info-circle"></i></button></div>`
+            {{#if admin}}
+                txt+=`  <div class="col-md-1 text-center"><button class="btn btn-outline-dark" onclick="IzmenaPrikaz(${response[i].id})"><i class="fas fa-cogs"></i></button></div>
+                        <div class="col-md-1 text-center"><button class="btn btn-outline-dark" onclick="Brisanje(${response[i].id})")><i class="fas fa-trash-alt"></i></button></div>`
+            {{/if}}
+            txt+=`</div>`;
+        }
+        prikaz.innerHTML = txt;
+    }
+    function Prijava() {
+        let name = document.querySelector("#userName").value;
+        let password = document.querySelector("#password").value;
+        $.ajax({
+            url:"/prijava",
+            method:"POST",
+            dataType:"json",
+            data:{"name":name,"password":password},
+            success:function (response) {
+                window.location.href = response;
+            }
+        });
+    }
+    function PopuniSelect(response) {
+        let grupa = document.querySelector("#kategorija");
+        let marka = document.querySelector("#marka");
+        let setGrupa = new Set();
+        let setMarka = new Set();
+        grupa.innerHTML = marka.innerHTML = `<option value="null">Odaberi</option>`
+        for(let i = 0;i<response.length;i++){
+            setGrupa.add(response[i].grupa);
+            setMarka.add(response[i].marka);
+        }
+        for(let val of setMarka){
+            marka.innerHTML+= `<option value = "${val}">${val}</option>`
+        }
+        for(let val of setGrupa){
+            grupa.innerHTML+= `<option value = "${val}">${val}</option>`
+        }
+    }
+    function PopuniSelect2(el) {
+        $.ajax({
+            url:"/popuniSelect",
+            method:"POST",
+            dataType:"json",
+            data:{"parametar":el.id,"val":el.value},
+            success:function (response) {
+                let select = el.id == "marka" ? document.querySelector("#model"):document.querySelector("#tip");
+                select.innerHTML = `<option value="null">Odaberi</option>`;
+                for(let i = 0;i<response.length;i++){
+                    select.innerHTML+=`<option value = "${response[i]}">${response[i]}</option>`
+                }
+            }
+        })
+    }
+    function OsveziSve(){
+        $.ajax({
+            url:"/proizvodi",
+            method:"POST",
+            dataType:"json",
+            success:function (response) {
+                Prikaz(response);
+                PopuniSelect(response);
+            }
+        });
+    }
+    OsveziSve();
+</script>
+</body>
+</html>
